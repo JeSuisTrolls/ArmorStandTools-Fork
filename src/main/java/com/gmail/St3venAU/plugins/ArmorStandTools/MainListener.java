@@ -24,7 +24,6 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -55,6 +54,10 @@ public class MainListener implements Listener {
             return;
         }
         if (stopEditing(p, false)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (isProtectedCustomMachine(as)) {
             event.setCancelled(true);
             return;
         }
@@ -322,14 +325,14 @@ public class MainListener implements Listener {
         if (AST.processInput(event.getPlayer(), event.getMessage())) event.setCancelled(true);
     }
 
-    @EventHandler
-    public void onPlayerCommand(final PlayerCommandPreprocessEvent event) {
-        Player p = event.getPlayer();
-        String cmd = event.getMessage().split(" ")[0].toLowerCase();
-        while (cmd.length() > 0 && cmd.charAt(0) == '/') cmd = cmd.substring(1);
-        if (cmd.length() > 0 && Config.deniedCommands.contains(cmd) && Utils.hasAnyTools(p)) {
-            event.setCancelled(true);
-            p.sendMessage(MM.parse(Config.cmdNotAllowed));
+    private boolean isProtectedCustomMachine(ArmorStand as) {
+        if (as.getMetadata("mob").stream()
+                .anyMatch(m -> m.getOwningPlugin() != null &&
+                        m.getOwningPlugin().getName().equalsIgnoreCase("MythicMobs"))) {
+            return true;
         }
+        if (as.getScoreboardTags().contains("model_engine")) return true;
+
+        return !as.getPersistentDataContainer().getKeys().isEmpty();
     }
 }
