@@ -43,7 +43,6 @@ public enum ArmorStandTool {
     SUMMON  ("summon",      Material.ARMOR_STAND,            0,  false, "astools.summon",   false),
     GUI     ("gui",         Material.NETHER_STAR,            1,  false, "astools.use",      false),
     ROTAT   ("rotat",       Material.MAGMA_CREAM,            2,  false, "astools.use",      false),
-    GEN_CMD ("gui_gen_cmd", Material.COMMAND_BLOCK,          53, true,  "astools.cmdblock", false),
     INVIS   ("gui_invis",   Material.GOLD_NUGGET,            42, true,  "astools.use",      false),
     SIZE    ("gui_size",    Material.EMERALD,                51, true,  "astools.use",      false),
     BASE    ("gui_base",    Material.STONE_SLAB,             41, true,  "astools.use",      false),
@@ -303,13 +302,6 @@ public enum ArmorStandTool {
             if (im != null) {
                 im.displayName(MM.parse("<yellow>" + t.name));
                 List<String> loreStrings = config.getStringList("tool." + t.config_id + ".lore");
-                if (t == GEN_CMD) {
-                    String cmdBlk = loreStrings.size() > 0 ? loreStrings.get(0) : "";
-                    String logged = loreStrings.size() > 1 ? loreStrings.get(1) : "";
-                    loreStrings = new ArrayList<>();
-                    if (!cmdBlk.isEmpty() && Config.saveToolCreatesCommandBlock) loreStrings.add(cmdBlk);
-                    if (!logged.isEmpty() && Config.logGeneratedSummonCommands)  loreStrings.add(logged);
-                }
                 List<Component> lore = new ArrayList<>();
                 for (String s : loreStrings) lore.add(MM.parse(s));
                 im.lore(lore);

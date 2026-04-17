@@ -15,7 +15,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -72,16 +71,6 @@ public class AST extends JavaPlugin {
         plugin = this;
         getServer().getPluginManager().registerEvents(new  MainListener(), this);
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-        Commands cmds = new Commands();
-        PluginCommand command = getCommand("astools");
-        if(command != null) {
-            command.setExecutor(cmds);
-        }
-        command = getCommand("ascmd");
-        if(command != null) {
-            command.setExecutor(cmds);
-            command.setTabCompleter(cmds);
-        }
         Config.reload();
         ArmorStandGUI.init();
         new BukkitRunnable() {

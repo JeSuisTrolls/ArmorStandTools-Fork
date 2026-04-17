@@ -28,6 +28,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.CraftingInventory;
@@ -111,17 +112,10 @@ public class MainListener implements Listener {
                     as.teleport(l);
                 }
                 case GUI -> new ArmorStandGUI(as, p);
-                default -> cancel = tool == ArmorStandTool.SUMMON || tool == ArmorStandTool.GEN_CMD || event.isCancelled();
+                default -> cancel = tool == ArmorStandTool.SUMMON || event.isCancelled();
             }
             event.setCancelled(cancel);
             return;
-        }
-        if ((Config.ignoreWGForASCmdExecution || !event.isCancelled()) && !p.isSneaking()) {
-            ArmorStandCmdManager asCmdManager = new ArmorStandCmdManager(as);
-            if (asCmdManager.hasCommands() && Utils.hasPermissionNode(p, "astools.ascmd.execute")) {
-                event.setCancelled(true);
-                asCmdManager.executeCommands(p);
-            }
         }
     }
 
@@ -163,10 +157,25 @@ public class MainListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player p = event.getPlayer();
+        UUID uuid = p.getUniqueId();
+        if (AST.waitingForName.containsKey(uuid)) {
+            Bukkit.getScheduler().cancelTask(AST.waitingForName.get(uuid).getValue());
+            AST.waitingForName.remove(uuid);
+        }
+    }
+
+    @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player p = event.getPlayer();
+        UUID uuid = p.getUniqueId();
         stopEditing(p, true);
-        if (AST.savedInventories.containsKey(p.getUniqueId())) AST.restoreInventory(p);
+        if (AST.savedInventories.containsKey(uuid)) AST.restoreInventory(p);
+        if (AST.waitingForName.containsKey(uuid)) {
+            Bukkit.getScheduler().cancelTask(AST.waitingForName.get(uuid).getValue());
+            AST.waitingForName.remove(uuid);
+        }
     }
 
     boolean stopEditing(Player p, boolean force) {

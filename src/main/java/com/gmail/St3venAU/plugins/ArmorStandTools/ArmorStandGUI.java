@@ -3,7 +3,6 @@ package com.gmail.St3venAU.plugins.ArmorStandTools;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
@@ -182,21 +181,6 @@ class ArmorStandGUI implements Listener {
             case INVIS:
                 as.setVisible(!as.isVisible());
                 Utils.title(p, Config.asVisible + ": " + (as.isVisible() ? Config.isTrue : Config.isFalse));
-                break;
-            case GEN_CMD:
-                String command = Utils.createSummonCommand(as);
-                p.sendMessage(MM.parse(command));
-                if (Config.saveToolCreatesCommandBlock) {
-                    if (Config.requireCreative && p.getGameMode() != GameMode.CREATIVE) {
-                        p.sendMessage(MM.parse(Config.creativeRequired));
-                    } else {
-                        Utils.generateCmdBlock(p.getLocation(), command);
-                        Utils.title(p, Config.cbCreated);
-                    }
-                }
-                if (Config.logGeneratedSummonCommands) {
-                    Config.logSummonCommand(p.getName(), command);
-                }
                 break;
             case SIZE:
                 as.setSmall(!as.isSmall());

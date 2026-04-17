@@ -9,16 +9,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,34 +23,26 @@ class Config {
 
     private static File languageConfigFile;
     private static FileConfiguration languageConfig;
-    private static Path summonCommandsLogPath;
     static final List<String> blacklistedWorlds = new ArrayList<>();
-
-    private static final SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     static WorldGuardPlugin worldGuardPlugin;
     static boolean squidSkyblockEnabled = false;
 
     static ItemStack helmet, chest, pants, boots, itemInHand, itemInOffHand;
 
-    static boolean isVisible                    = true;
-    static boolean isSmall                      = false;
-    static boolean hasArms                      = true;
-    static boolean hasBasePlate                 = false;
-    static boolean hasGravity                   = false;
-    static String  defaultName                  = "";
-    static boolean invulnerable                 = false;
-    static boolean equipmentLock                = false;
-    static boolean allowMoveWorld               = false;
-    static boolean deactivateOnWorldChange      = true;
-    static boolean showDebugMessages            = false;
-    static boolean requireCreative              = false;
-    static int     defaultASCmdCooldownTicks    = 0;
-    static boolean ignoreWGForASCmdExecution    = false;
-    static boolean saveToolCreatesCommandBlock  = true;
-    static boolean logGeneratedSummonCommands   = false;
-    static boolean crouchRightClickOpensGUI     = false;
-    static boolean useCommandForTextInput       = false;
+    static boolean isVisible               = true;
+    static boolean isSmall                 = false;
+    static boolean hasArms                 = true;
+    static boolean hasBasePlate            = false;
+    static boolean hasGravity              = false;
+    static String  defaultName             = "";
+    static boolean invulnerable            = false;
+    static boolean equipmentLock           = false;
+    static boolean allowMoveWorld          = false;
+    static boolean deactivateOnWorldChange = true;
+    static boolean showDebugMessages       = false;
+    static boolean crouchRightClickOpensGUI = false;
+    static boolean useCommandForTextInput  = false;
 
     // armorstand GUI config
     static String                     guiTitle = "";
@@ -67,20 +52,14 @@ class Config {
 
     static String
             invReturned, asDropped, asVisible, isTrue, isFalse,
-            carrying, cbCreated, size, small, normal, basePlate,
+            carrying, size, small, normal, basePlate,
             isOn, isOff, gravity, arms, invul, equip, locked,
-            unLocked, notConsole, giveMsg1, giveMsg2, conReload,
-            noRelPerm, wgNoPerm, currently,
-            noCommandPerm, generalNoPerm, armorStand, none, guiInUse,
-            noASNearBy, closestAS, creativeRequired, type, command,
-            cmdOnCooldown, cooldownRemovedFrom, isAnInvalidCooldown,
-            cooldownSetTo, ticksFor, setCooldown, removeCooldown,
-            cmdNotAllowed, glow, crouch, click, finish,
-            hasTheseCmdsAssigned, hasNoCmds, priority, delay,
-            errorExecutingCmd, isNotValidNumber, removedFromAs,
-            listAssignedCmds, addACmd, removeACmd, cmdHelp,
+            unLocked, wgNoPerm, currently,
+            generalNoPerm, armorStand, none, guiInUse,
+            glow, crouch, click, finish,
             enterName, enterName2, inputTimeout,
-            nameSet, nameRemoved, enterNameC, enterNameC2;
+            nameSet, nameRemoved, enterNameC, enterNameC2,
+            notConsole, giveMsg1, giveMsg2, conReload, noRelPerm, noCommandPerm;
 
     static void reload() {
         reloadMainConfig();
@@ -93,7 +72,6 @@ class Config {
         AST.plugin.saveDefaultConfig();
         AST.plugin.reloadConfig();
         FileConfiguration config = AST.plugin.getConfig();
-        summonCommandsLogPath       = Paths.get("AST-generated-summon-commands.log");
         helmet                      = getItemStack("helmet");
         chest                       = getItemStack("chest");
         pants                       = getItemStack("pants");
@@ -110,12 +88,7 @@ class Config {
         equipmentLock               = config.getBoolean("equipmentLock");
         allowMoveWorld              = config.getBoolean("allowMovingStandsBetweenWorlds");
         deactivateOnWorldChange     = config.getBoolean("deactivateToolsOnWorldChange");
-        requireCreative             = config.getBoolean("requireCreativeForSaveAsCmdBlock");
-        defaultASCmdCooldownTicks   = config.getInt("defaultASCmdCooldownTicks");
-        ignoreWGForASCmdExecution   = config.getBoolean("bypassWorldguardForASCmdExecution");
         showDebugMessages           = config.getBoolean("showDebugMessages", false);
-        saveToolCreatesCommandBlock = config.getBoolean("saveToolCreatesCommandBlock", true);
-        logGeneratedSummonCommands  = config.getBoolean("logGeneratedSummonCommands", false);
         crouchRightClickOpensGUI    = config.getBoolean("crouchRightClickOpensGUI", false);
         useCommandForTextInput      = config.getBoolean("useCommandForTextInput", false);
 
@@ -191,15 +164,6 @@ class Config {
         blacklistedWorlds.addAll(config.getStringList("blacklistedWorlds"));
     }
 
-    static void logSummonCommand(String playerName, String command) {
-        List<String> lines = Collections.singletonList("<" + timestampFormat.format(new Timestamp(System.currentTimeMillis())) + " " + playerName + "> " + command);
-        try {
-            Files.write(summonCommandsLogPath, lines, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private static void saveDefaultLanguageConfig() {
         languageConfigFile = new File(AST.plugin.getDataFolder(), "language.yml");
         if (!languageConfigFile.exists()) {
@@ -220,7 +184,6 @@ class Config {
         isTrue = languageConfig.getString("isTrue");
         isFalse = languageConfig.getString("isFalse");
         carrying = languageConfig.getString("carrying");
-        cbCreated = languageConfig.getString("cbCreated");
         size = languageConfig.getString("size");
         small = languageConfig.getString("small");
         normal = languageConfig.getString("normal");
@@ -245,35 +208,10 @@ class Config {
         armorStand = languageConfig.getString("armorStand");
         none = languageConfig.getString("none");
         guiInUse = languageConfig.getString("guiInUse");
-        noASNearBy = languageConfig.getString("noASNearBy");
-        closestAS = languageConfig.getString("closestAS");
-        type = languageConfig.getString("type");
-        command = languageConfig.getString("command");
-        creativeRequired = languageConfig.getString("creativeRequired");
-        cmdOnCooldown = languageConfig.getString("cmdOnCooldown");
-        cooldownRemovedFrom = languageConfig.getString("cooldownRemovedFrom");
-        isAnInvalidCooldown = languageConfig.getString("isAnInvalidCooldown");
-        cooldownSetTo = languageConfig.getString("cooldownSetTo");
-        ticksFor = languageConfig.getString("ticksFor");
-        setCooldown = languageConfig.getString("setCooldown");
-        removeCooldown = languageConfig.getString("removeCooldown");
-        ticksFor = languageConfig.getString("ticksFor");
-        cmdNotAllowed = languageConfig.getString("cmdNotAllowed");
         glow = languageConfig.getString("glow");
         crouch = languageConfig.getString("crouch");
         click = languageConfig.getString("click");
         finish = languageConfig.getString("finish");
-        hasTheseCmdsAssigned = languageConfig.getString("hasTheseCmdsAssigned");
-        hasNoCmds = languageConfig.getString("hasNoCmds");
-        priority = languageConfig.getString("priority");
-        delay = languageConfig.getString("delay");
-        errorExecutingCmd = languageConfig.getString("errorExecutingCmd");
-        isNotValidNumber = languageConfig.getString("isNotValidNumber");
-        removedFromAs = languageConfig.getString("removedFromAs");
-        listAssignedCmds = languageConfig.getString("listAssignedCmds");
-        addACmd = languageConfig.getString("addACmd");
-        removeACmd = languageConfig.getString("removeACmd");
-        cmdHelp = languageConfig.getString("cmdHelp");
         enterName = languageConfig.getString("enterName");
         enterName2 = languageConfig.getString("enterName2");
         inputTimeout = languageConfig.getString("inputTimeout");
