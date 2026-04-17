@@ -1,0 +1,15 @@
+main: com.gmail.St3venAU.plugins.ArmorStandTools.AST
+name: ArmorStandTools
+version: ${project.version}
+api-version: 1.21
+author: St3venAU
+description: Armor stand manipulation tools
+softdepend: [WorldGuard, SquidSkyblock]
+commands:
+   astools:
+      description: Give yourself the armor stand tools
+      aliases: ast
+      usage: Usage /astools or /astools reload
+   ascmd:
+      description: List/Add/Remove commands assigned to the nearest armor stand
+      usage: Usage /ascmd list, /ascmd remove <command_number>, /ascmd add <priority> <delay> <player/console/bungee> <command/bungee_server_name>
