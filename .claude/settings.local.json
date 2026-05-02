@@ -7,7 +7,10 @@
       "Bash(mvn install:install-file -Dfile=libs/SquidSkyblock-0.1.19-SNAPSHOT.jar -DgroupId=io.squid -DartifactId=squidskyblock -Dversion=0.1.19-SNAPSHOT -Dpackaging=jar)",
       "Bash(\"/c/Program Files/Maven/bin/mvn\" install:install-file -Dfile=libs/SquidSkyblock-0.1.19-SNAPSHOT.jar -DgroupId=io.squid -DartifactId=squidskyblock -Dversion=0.1.19-SNAPSHOT -Dpackaging=jar)",
       "Bash(jar tf *)",
-      "Bash(grep -v \"^d.*\\\\\\\\.git\")"
+      "Bash(grep -v \"^d.*\\\\\\\\.git\")",
+      "Bash(cd /tmp)",
+      "Bash(jar xf *)",
+      "Bash(javap -p io/squid/squidcore/bukkit/SquidCore.class)"
     ],
     "deny": [],
     "ask": []

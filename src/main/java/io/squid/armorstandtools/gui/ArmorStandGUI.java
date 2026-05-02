@@ -1,0 +1,277 @@
+package io.squid.armorstandtools.gui;
+
+import io.squid.armorstandtools.AST;
+import io.squid.armorstandtools.config.Config;
+import io.squid.armorstandtools.tools.ArmorStandTool;
+import io.squid.armorstandtools.utils.MM;
+import io.squid.armorstandtools.utils.Utils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.HashSet;
+import java.util.UUID;
+
+public class ArmorStandGUI implements Listener {
+
+    private static final int INV_SLOT_HELMET    = 1;
+    private static final int INV_SLOT_CHEST     = 10;
+    private static final int INV_SLOT_LEGS      = 19;
+    private static final int INV_SLOT_BOOTS     = 28;
+    private static final int INV_SLOT_MAIN_HAND = 9;
+    private static final int INV_SLOT_OFF_HAND  = 11;
+
+    private static final HashSet<Integer> inUse    = new HashSet<>();
+    private static final HashSet<Integer> invSlots = new HashSet<>();
+
+    private static final HashSet<Material> helmetTypes  = new HashSet<>();
+    private static final HashSet<Material> chestTypes   = new HashSet<>();
+    private static final HashSet<Material> leggingTypes = new HashSet<>();
+    private static final HashSet<Material> bootTypes    = new HashSet<>();
+
+    private Inventory  i;
+    private ArmorStand as;
+
+    public ArmorStandGUI(ArmorStand as, Player p) {
+        if (isInUse(as)) {
+            p.sendMessage(MM.parse(Config.guiInUse));
+            return;
+        }
+        AST.plugin.getServer().getPluginManager().registerEvents(this, AST.plugin);
+        this.as = as;
+
+        Component title;
+        if (Config.guiTitle != null && !Config.guiTitle.isEmpty()) {
+            title = MM.parse(Config.guiTitle);
+        } else {
+            Component cn = as.customName();
+            title = cn != null ? cn : MM.parse(Config.armorStand);
+        }
+
+        i = Bukkit.createInventory(null, 54, title);
+
+        for (ArmorStandTool tool : ArmorStandTool.values()) {
+            if (tool.isForGui() && tool.isEnabled()) {
+                i.setItem(tool.getSlot(), tool.updateLore(as));
+            }
+        }
+        EntityEquipment entityEquipment = as.getEquipment();
+        if (entityEquipment != null) {
+            i.setItem(INV_SLOT_MAIN_HAND, entityEquipment.getItemInMainHand());
+            i.setItem(INV_SLOT_OFF_HAND,  entityEquipment.getItemInOffHand());
+            i.setItem(INV_SLOT_HELMET,    entityEquipment.getHelmet());
+            i.setItem(INV_SLOT_CHEST,     entityEquipment.getChestplate());
+            i.setItem(INV_SLOT_LEGS,      entityEquipment.getLeggings());
+            i.setItem(INV_SLOT_BOOTS,     entityEquipment.getBoots());
+        }
+        inUse.add(as.getEntityId());
+        p.openInventory(i);
+    }
+
+    public static void init() {
+        invSlots.add(INV_SLOT_HELMET);
+        invSlots.add(INV_SLOT_CHEST);
+        invSlots.add(INV_SLOT_LEGS);
+        invSlots.add(INV_SLOT_BOOTS);
+        invSlots.add(INV_SLOT_MAIN_HAND);
+        invSlots.add(INV_SLOT_OFF_HAND);
+        for (Material m : Material.values()) {
+            String n = m.name();
+            if (n.endsWith("_HELMET"))     helmetTypes.add(m);
+            if (n.endsWith("_CHESTPLATE")) chestTypes.add(m);
+            if (n.endsWith("_LEGGINGS"))   leggingTypes.add(m);
+            if (n.endsWith("_BOOTS"))      bootTypes.add(m);
+        }
+        helmetTypes.add(Material.PLAYER_HEAD);
+        helmetTypes.add(Material.CREEPER_HEAD);
+        helmetTypes.add(Material.DRAGON_HEAD);
+        helmetTypes.add(Material.ZOMBIE_HEAD);
+        helmetTypes.add(Material.SKELETON_SKULL);
+        helmetTypes.add(Material.WITHER_SKELETON_SKULL);
+        helmetTypes.add(Material.JACK_O_LANTERN);
+    }
+
+    public static boolean isInUse(ArmorStand as) {
+        return inUse.contains(as.getEntityId());
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        if (!event.getInventory().equals(i)) return;
+        HandlerList.unregisterAll(this);
+        inUse.remove(as.getEntityId());
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!event.getInventory().equals(i) || !(event.getWhoClicked() instanceof Player p)) return;
+        if (event.getClick() == ClickType.SHIFT_RIGHT || event.getClick() == ClickType.NUMBER_KEY) {
+            event.setCancelled(true);
+            return;
+        }
+        int slot = event.getRawSlot();
+        Location l = as.getLocation();
+        if (invSlots.contains(slot)) {
+            if (AST.checkBlockPermission(p, l.getBlock())) {
+                updateArmorStandInventory();
+            } else {
+                event.setCancelled(true);
+                p.sendMessage(MM.parse(Config.wgNoPerm));
+            }
+            return;
+        }
+        if (event.getClick() == ClickType.SHIFT_LEFT) {
+            event.setCancelled(true);
+            ItemStack item = event.getCurrentItem();
+            if (slot > i.getSize() && item != null && !ArmorStandTool.isTool(item) && event.getClickedInventory() != null) {
+                if (AST.checkBlockPermission(p, l.getBlock())) {
+                    Material m = item.getType();
+                    int newSlot = -1;
+                    if      (helmetTypes.contains(m)  && slotIsEmpty(INV_SLOT_HELMET))    newSlot = INV_SLOT_HELMET;
+                    else if (chestTypes.contains(m)   && slotIsEmpty(INV_SLOT_CHEST))     newSlot = INV_SLOT_CHEST;
+                    else if (leggingTypes.contains(m) && slotIsEmpty(INV_SLOT_LEGS))      newSlot = INV_SLOT_LEGS;
+                    else if (bootTypes.contains(m)    && slotIsEmpty(INV_SLOT_BOOTS))     newSlot = INV_SLOT_BOOTS;
+                    else if (slotIsEmpty(INV_SLOT_MAIN_HAND))                             newSlot = INV_SLOT_MAIN_HAND;
+                    else if (slotIsEmpty(INV_SLOT_OFF_HAND))                              newSlot = INV_SLOT_OFF_HAND;
+                    if (newSlot != -1) {
+                        i.setItem(newSlot, item);
+                        event.getClickedInventory().setItem(event.getSlot(), null);
+                        updateArmorStandInventory();
+                    }
+                } else {
+                    p.sendMessage(MM.parse(Config.wgNoPerm));
+                }
+            }
+            return;
+        }
+        if (slot > i.getSize()) return;
+        event.setCancelled(true);
+        if (!(event.getWhoClicked() instanceof Player)) return;
+        ArmorStandTool t = ArmorStandTool.get(event.getCurrentItem());
+        if (t == null) return;
+        if (!AST.playerHasPermission(p, l.getBlock(), t)) {
+            p.sendMessage(MM.parse(Config.generalNoPerm));
+            return;
+        }
+        switch (t) {
+            case HEAD:
+            case BODY:
+            case LARM:
+            case RARM:
+            case LLEG:
+            case RLEG:
+                UUID uuid = p.getUniqueId();
+                AST.activeTool.put(uuid, t);
+                AST.selectedArmorStand.put(uuid, as);
+                p.closeInventory();
+                t.showTitle(p);
+                break;
+            case INVIS:
+                as.setVisible(!as.isVisible());
+                Utils.title(p, Config.asVisible + ": " + (as.isVisible() ? Config.isTrue : Config.isFalse));
+                break;
+            case SIZE:
+                as.setSmall(!as.isSmall());
+                Utils.title(p, Config.size + ": " + (as.isSmall() ? Config.small : Config.normal));
+                break;
+            case BASE:
+                as.setBasePlate(!as.hasBasePlate());
+                Utils.title(p, Config.basePlate + ": " + (as.hasBasePlate() ? Config.isOn : Config.isOff));
+                break;
+            case GRAV:
+                as.setGravity(!as.hasGravity());
+                Utils.title(p, Config.gravity + ": " + (as.hasGravity() ? Config.isOn : Config.isOff));
+                break;
+            case ARMS:
+                as.setArms(!as.hasArms());
+                Utils.title(p, Config.arms + ": " + (as.hasArms() ? Config.isOn : Config.isOff));
+                break;
+            case NAME:
+                p.closeInventory();
+                AST.setName(p, as);
+                break;
+            case INVUL:
+                boolean inv = !as.isInvulnerable();
+                as.setInvulnerable(inv);
+                Utils.title(p, Config.invul + ": " + (inv ? Config.isOn : Config.isOff));
+                break;
+            case SLOTS:
+                Utils.title(p, Config.equip + ": " + (Utils.toggleSlotsDisabled(as) ? Config.locked : Config.unLocked));
+                break;
+            case MOVE:
+                p.closeInventory();
+                AST.pickUpArmorStand(as, p, false);
+                Utils.title(p, Config.carrying);
+                break;
+            case GLOW:
+                boolean glowing = !as.isGlowing();
+                as.setGlowing(glowing);
+                Utils.title(p, Config.glow + ": " + (glowing ? Config.isOn : Config.isOff));
+                break;
+            default:
+                return;
+        }
+        i.setItem(t.getSlot(), t.updateLore(as));
+    }
+
+    private boolean slotIsEmpty(int slot) {
+        ItemStack item = i.getItem(slot);
+        return item == null || item.getType() == Material.AIR || item.getAmount() == 0;
+    }
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (!event.getInventory().equals(i) || !(event.getWhoClicked() instanceof Player p)) return;
+        boolean invModified = false;
+        for (int slot : event.getRawSlots()) {
+            if (slot < i.getSize()) {
+                if (invSlots.contains(slot)) {
+                    invModified = true;
+                } else {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
+        if (invModified) {
+            if (AST.checkBlockPermission(p, as.getLocation().getBlock())) {
+                updateArmorStandInventory();
+            } else {
+                event.setCancelled(true);
+                p.sendMessage(MM.parse(Config.wgNoPerm));
+            }
+        }
+    }
+
+    private void updateArmorStandInventory() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                EntityEquipment equipment = as.getEquipment();
+                if (as == null || i == null || equipment == null) return;
+                equipment.setItemInMainHand(i.getItem(INV_SLOT_MAIN_HAND));
+                equipment.setItemInOffHand(i.getItem(INV_SLOT_OFF_HAND));
+                equipment.setHelmet(i.getItem(INV_SLOT_HELMET));
+                equipment.setChestplate(i.getItem(INV_SLOT_CHEST));
+                equipment.setLeggings(i.getItem(INV_SLOT_LEGS));
+                equipment.setBoots(i.getItem(INV_SLOT_BOOTS));
+            }
+        }.runTaskLater(AST.plugin, 1L);
+    }
+}

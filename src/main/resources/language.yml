@@ -13,14 +13,14 @@
 ####################
 # General Messages #
 ####################
-invReturned: '<green>Inventory contents returned'
-asDropped: '<green>Armor stand dropped'
+invReturned: '<unlock-icon><success-message>Inventory contents returned.'
+asDropped: '<unlock-icon><success-message>Armor stand dropped successfully.'
 asVisible: 'Visible'
 isTrue: 'True'
 isFalse: 'False'
-carrying: '<green>Carrying armor stand. Click to drop.'
-generalNoPerm: '<red>No permission for this tool and/or region'
-cbCreated: '<green>Command block created'
+carrying: '<pending-icon><pending-color>Carrying armor stand. <yellow>Click<pending-color> to drop.'
+generalNoPerm: '<lock-icon><error-message>No permission for this tool and/or region.'
+cbCreated: '<unlock-icon><success-message>Command block created.'
 size: 'Size'
 small: 'Small'
 normal: 'Normal'
@@ -34,51 +34,51 @@ equip: 'Equipment'
 locked: 'Locked'
 unLocked: 'Un-Locked'
 currently: 'Currently'
-notConsole: '<red>This command can not be run from console'
-giveMsg1: '<green>Given armor stand tools. L-click any tool to cycle through tools.'
-giveMsg2: '<green>Run this command again to return your inventory.'
-conReload: '<green>Armor Stand Tools config reloaded'
-noRelPerm: '<red>You do not have permission to reload the plugin'
-wgNoPerm: '<red>No permission to alter an armor stand in this region'
-noCommandPerm: '<red>You do not have permission to use this command'
+notConsole: '<lock-icon><error-message>This command cannot be run from console.'
+giveMsg1: '<unlock-icon><success-message>Armor stand tools given. <yellow>Left-click<success-message> any tool to cycle through tools.'
+giveMsg2: '<pending-icon><pending-color>Run this command again to return your inventory.'
+conReload: '<unlock-icon><success-message>Armor Stand Tools config reloaded.'
+noRelPerm: '<lock-icon><error-message>You do not have permission to reload the plugin.'
+wgNoPerm: '<lock-icon><error-message>No permission to alter an armor stand in this region.'
+noCommandPerm: '<lock-icon><error-message>You do not have permission to use this command.'
 armorStand: 'Armor Stand'
 none: 'None'
-guiInUse: '<red>This armor stands GUI is in use'
-noASNearBy: '<red>No armor stand found near by'
-closestAS: '<gold>Closest armor stand'
+guiInUse: '<lock-icon><error-message>This armor stand''s GUI is already in use.'
+noASNearBy: '<lock-icon><error-message>No armor stand found nearby.'
+closestAS: '<pending-icon><pending-color>Closest armor stand'
 type: 'Type'
 command: 'Command'
-creativeRequired: '<red>Creative mode is required to save an armor stand as a command block'
-cmdOnCooldown: '<red>This command is on cooldown'
-cooldownRemovedFrom: '<green>Cooldown removed from'
-isAnInvalidCooldown: '<red>is an invalid cooldown time'
-cooldownSetTo: '<green>Cooldown set to'
+creativeRequired: '<lock-icon><error-message>Creative mode is required to save an armor stand as a command block.'
+cmdOnCooldown: '<lock-icon><error-message>This command is on cooldown.'
+cooldownRemovedFrom: '<unlock-icon><success-message>Cooldown removed from'
+isAnInvalidCooldown: '<lock-icon><error-message>is an invalid cooldown time.'
+cooldownSetTo: '<unlock-icon><success-message>Cooldown set to'
 ticksFor: 'ticks for'
 setCooldown: 'Set the cooldown for the command'
 removeCooldown: 'Remove the cooldown for the command'
 glow: 'Glow'
-cmdNotAllowed: '<red>That command is not allowed while using Armor Stand Tools'
+cmdNotAllowed: '<lock-icon><error-message>That command is not allowed while using Armor Stand Tools.'
 crouch: 'Crouch'
 click: 'Click'
 finish: 'Finish'
-hasTheseCmdsAssigned: '<gold>has these commands assigned'
-hasNoCmds: '<gold>has no commands assigned'
+hasTheseCmdsAssigned: '<pending-icon><pending-color>has these commands assigned'
+hasNoCmds: '<pending-icon><pending-color>has no commands assigned'
 priority: 'Priority'
 delay: 'Delay'
-errorExecutingCmd: '<red>An error occured executing command'
-isNotValidNumber: '<red>is not a valid number'
-removedFromAs: '<green>removed from armor stand'
+errorExecutingCmd: '<lock-icon><error-message>An error occurred executing the command.'
+isNotValidNumber: '<lock-icon><error-message>is not a valid number.'
+removedFromAs: '<unlock-icon><success-message>Removed from armor stand.'
 listAssignedCmds: 'List assigned commands'
 addACmd: 'Add a command'
 removeACmd: 'Remove a command'
 cmdHelp: 'This command is used to add/remove commands to the nearest armor stand (within 4 blocks). The commands are executed when the armor stand is right clicked, lowest priority first.'
-enterName: '<gold>Enter armor stand name in chat'
-enterName2: '<gold>Enter armor stand name in chat, or to remove the name enter:'
-inputTimeout: '<red>Input timeout. Please try again.'
-nameSet: '<green>Armor stand name set'
-nameRemoved: '<green>Armor stand name removed'
-enterNameC: '<gold>To set armor stand name'
-enterNameC2: '<gold>Or to remove the name'
+enterName: '<pending-icon><pending-color>Enter armor stand name in chat.'
+enterName2: '<pending-icon><pending-color>Enter armor stand name in chat, or to remove the name enter:'
+inputTimeout: '<lock-icon><error-message>Input timeout. Please try again.'
+nameSet: '<unlock-icon><success-message>Armor stand name set.'
+nameRemoved: '<unlock-icon><success-message>Armor stand name removed.'
+enterNameC: '<pending-icon><pending-color>To set armor stand name'
+enterNameC2: '<pending-icon><pending-color>Or to remove the name'
 #############################
 # Tool names & descriptions #
 #############################
@@ -325,54 +325,63 @@ tool:
     lore:
       - "<#565656><font:fonts:icons>armor stand</font>"
       - ""
+      - "<aqua>Visible: {value}"
 
   gui_size:
     name: "<#E7BB00><b>Toggle Size"
     lore:
       - "<#565656><font:fonts:icons>armor stand</font>"
       - ""
+      - "<aqua>Size: {value}"
 
   gui_base:
     name: "<#E7BB00><b>Toggle Base"
     lore:
       - "<#565656><font:fonts:icons>armor stand</font>"
       - ""
+      - "<aqua>Base plate: {value}"
 
   gui_grav:
     name: "<#E7BB00><b>Toggle Gravity"
     lore:
       - "<#565656><font:fonts:icons>armor stand</font>"
       - ""
+      - "<aqua>Gravity: {value}"
 
   gui_arms:
     name: "<#E7BB00><b>Toggle Arms"
     lore:
       - "<#565656><font:fonts:icons>armor stand</font>"
       - ""
+      - "<aqua>Arms: {value}"
 
   gui_name:
     name: "<#E7BB00><b>Change Name"
     lore:
       - "<#565656><font:fonts:icons>armor stand</font>"
       - ""
+      - "<aqua>Currently: {value}"
 
   gui_slots:
     name: "<#E7BB00><b>Toggle Equipment Lock"
     lore:
       - "<#565656><font:fonts:icons>armor stand</font>"
       - ""
+      - "<aqua>Equipment: {value}"
 
   gui_invul:
     name: "<#E7BB00><b>Toggle Invulnerability"
     lore:
       - "<#565656><font:fonts:icons>armor stand</font>"
       - ""
+      - "<aqua>Invulnerability: {value}"
 
   gui_glow:
     name: "<#E7BB00><b>Toggle Glow"
     lore:
       - "<#565656><font:fonts:icons>armor stand</font>"
       - ""
+      - "<aqua>Glow: {value}"
 
   gui_head:
     name: "<#E7BB00><b>Move Head"
